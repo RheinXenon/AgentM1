@@ -115,7 +115,9 @@ class MedicalRAG:
             )
             
             # 检查检索置信度
-            if not retrieved_docs or retrieved_docs[0][1] < self.config.min_retrieval_confidence:
+            # 注意: Qdrant使用余弦距离，分数越小表示越相似（0=完全相同，2=完全相反）
+            # 所以这里检查分数是否大于阈值（距离太远）
+            if not retrieved_docs or retrieved_docs[0][1] > self.config.min_retrieval_confidence:
                 return {
                     "agent": "RAG智能体",
                     "response": "抱歉,我在知识库中没有找到足够可靠的相关信息来回答您的问题。建议咨询专业医生或尝试使用网络搜索功能。",

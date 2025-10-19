@@ -19,6 +19,7 @@ class ChatResponse(BaseModel):
     response: str
     sources: Optional[List[Dict]] = None
     confidence: Optional[float] = None
+    debug_info: Optional[Dict] = None
 
 
 class ConfigRequest(BaseModel):

@@ -246,6 +246,69 @@
         .success-message.show {
             display: block;
         }
+        .debug-section {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+        .debug-toggle {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+        .debug-toggle:hover {
+            background: #5a6268;
+        }
+        .debug-info {
+            display: none;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .debug-info.show {
+            display: block;
+        }
+        .debug-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        .debug-item-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .debug-llm-call {
+            margin: 5px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            border-left: 2px solid #764ba2;
+        }
+        .debug-llm-call .model-name {
+            font-weight: bold;
+            color: #764ba2;
+        }
+        .debug-llm-call .agent-name {
+            color: #667eea;
+            font-size: 12px;
+        }
+        .debug-llm-call .purpose {
+            color: #666;
+            font-style: italic;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -273,6 +336,27 @@
             </div>
             
             <div class="loading" id="loading">正在思考中...</div>
+            
+            <!-- 调试信息区域 -->
+            <div class="debug-section">
+                <button class="debug-toggle" onclick="toggleDebugInfo()">
+                    🔍 调试信息
+                </button>
+                <div class="debug-info" id="debugInfo">
+                    <div class="debug-item">
+                        <div class="debug-item-header">📊 Agent决策</div>
+                        <div id="debugDecision">暂无数据</div>
+                    </div>
+                    <div class="debug-item">
+                        <div class="debug-item-header">🤖 执行Agent</div>
+                        <div id="debugExecution">暂无数据</div>
+                    </div>
+                    <div class="debug-item">
+                        <div class="debug-item-header">🔧 LLM调用记录</div>
+                        <div id="debugLLMCalls">暂无调用记录</div>
+                    </div>
+                </div>
+            </div>
             
             <div class="input-area">
                 <div class="input-group">
@@ -507,6 +591,11 @@
                 // 显示助手回复
                 addMessage('assistant', data.response, data.agent, data.sources);
                 
+                // 更新调试信息
+                if (data.debug_info) {
+                    updateDebugInfo(data.debug_info);
+                }
+                
             } catch (error) {
                 addMessage('assistant', '抱歉,发生错误: ' + error.message, '系统');
             } finally {
@@ -544,6 +633,46 @@
             
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        // 切换调试信息显示
+        function toggleDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.classList.toggle('show');
+        }
+        
+        // 更新调试信息
+        function updateDebugInfo(debugInfo) {
+            // 更新决策信息
+            const decisionEl = document.getElementById('debugDecision');
+            if (debugInfo.decision_agent) {
+                decisionEl.innerHTML = `<strong>决策结果:</strong> ${debugInfo.decision_agent}`;
+            }
+            
+            // 更新执行Agent信息
+            const executionEl = document.getElementById('debugExecution');
+            if (debugInfo.execution_agent) {
+                executionEl.innerHTML = `<strong>执行Agent:</strong> ${debugInfo.execution_agent}`;
+            }
+            
+            // 更新LLM调用记录
+            const llmCallsEl = document.getElementById('debugLLMCalls');
+            if (debugInfo.llm_calls && debugInfo.llm_calls.length > 0) {
+                let html = '';
+                debugInfo.llm_calls.forEach((call, index) => {
+                    html += `
+                        <div class="debug-llm-call">
+                            <div><strong>调用 ${index + 1}:</strong></div>
+                            <div class="agent-name">Agent: ${call.agent}</div>
+                            <div class="model-name">模型: ${call.model}</div>
+                            <div class="purpose">用途: ${call.purpose}</div>
+                        </div>
+                    `;
+                });
+                llmCallsEl.innerHTML = html;
+            } else {
+                llmCallsEl.innerHTML = '暂无调用记录';
+            }
         }
     </script>
 </body>

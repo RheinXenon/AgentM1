@@ -12,8 +12,9 @@ load_dotenv()
 class AgentDecisionConfig:
     """Agent决策配置"""
     def __init__(self):
+        self.model_name = os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus")
         self.llm = ChatTongyi(
-            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            model=self.model_name,
             dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
             temperature=0.1,  # 低温度以确保决策准确性
             top_p=0.8
@@ -22,8 +23,9 @@ class AgentDecisionConfig:
 class ConversationConfig:
     """对话配置"""
     def __init__(self):
+        self.model_name = os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus")
         self.llm = ChatTongyi(
-            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            model=self.model_name,
             dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
             temperature=0.7,  # 适度创造性
             top_p=0.8
@@ -33,8 +35,9 @@ class ConversationConfig:
 class WebSearchConfig:
     """网络搜索配置"""
     def __init__(self):
+        self.model_name = os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus")
         self.llm = ChatTongyi(
-            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            model=self.model_name,
             dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
             temperature=0.3,
             top_p=0.8
@@ -63,8 +66,9 @@ class RAGConfig:
         )
         
         # LLM模型
+        self.model_name = os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus")
         self.llm = ChatTongyi(
-            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            model=self.model_name,
             dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
             temperature=0.3,
             top_p=0.8
@@ -72,7 +76,7 @@ class RAGConfig:
         
         # 检索配置
         self.top_k = 5  # 检索结果数量
-        self.min_retrieval_confidence = 0.40  # 最小置信度阈值
+        self.min_retrieval_confidence = 1.0  # 最大距离阈值（余弦距离，越小越相似，0-2范围）
         self.reranker_top_k = 3  # 重排序后保留数量
         self.include_sources = True  # 是否包含来源
         self.context_limit = 20

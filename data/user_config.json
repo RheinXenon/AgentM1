@@ -6,5 +6,5 @@
   "websearch_prompt": "你是一个智能助手。请根据以下搜索结果回答用户的问题。\n\n搜索结果:\n{search_results}\n\n对话历史:\n{conversation_history}\n\n用户问题: {query}\n\n请综合搜索结果,给出准确、有用的回答。\n\n你的回答:",
   "system_name": "智能Agent系统",
   "welcome_message": "您好!我是您的智能助手。我可以回答各种问题,提供有用的信息和建议。请问有什么可以帮助您的?",
-  "updated_at": "2025-10-19T11:57:04.325141"
+  "updated_at": "2025-10-19T13:45:28.621818"
 }
