@@ -2,8 +2,8 @@
 RAG智能体 - 基于向量数据库的检索增强生成
 """
 from typing import Dict, List, Optional
-from langchain.prompts import PromptTemplate
-from langchain_community.vectorstores import Qdrant
+from langchain_core.prompts import PromptTemplate
+from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from config import RAGConfig
@@ -72,10 +72,10 @@ class MedicalRAG:
                 print(f"创建新的collection: {self.config.collection_name}")
             
             # 初始化vectorstore
-            self.vectorstore = Qdrant(
+            self.vectorstore = QdrantVectorStore(
                 client=self.qdrant_client,
                 collection_name=self.config.collection_name,
-                embeddings=self.embedding_model
+                embedding=self.embedding_model
             )
             
         except Exception as e:

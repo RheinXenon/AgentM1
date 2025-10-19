@@ -1,1 +1,5 @@
 说明markdown/*
+.env
+__pycache__/*
+agents/__pycache__/*
+agents/rag_agent/__pycache__/*
