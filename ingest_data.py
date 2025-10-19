@@ -1,9 +1,104 @@
 """
 数据导入工具 - 将文本数据导入到RAG系统
-简化版:直接添加文本到向量数据库
+支持从text文件夹导入多种格式的文件
 """
 import argparse
+import os
+from pathlib import Path
+from typing import List, Tuple
 from agents.rag_agent import MedicalRAG
+
+def read_txt_file(file_path: str) -> str:
+    """读取TXT文件内容"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except UnicodeDecodeError:
+        # 如果UTF-8失败，尝试其他编码
+        try:
+            with open(file_path, 'r', encoding='gbk') as f:
+                return f.read()
+        except Exception as e:
+            print(f"⚠️  无法读取文件 {file_path}: {e}")
+            return ""
+
+def read_pdf_file(file_path: str) -> str:
+    """读取PDF文件内容"""
+    try:
+        import PyPDF2
+        text = ""
+        with open(file_path, 'rb') as f:
+            pdf_reader = PyPDF2.PdfReader(f)
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+        return text
+    except ImportError:
+        print("⚠️  需要安装PyPDF2来读取PDF文件: pip install PyPDF2")
+        return ""
+    except Exception as e:
+        print(f"⚠️  无法读取PDF文件 {file_path}: {e}")
+        return ""
+
+def read_file(file_path: str) -> Tuple[str, str]:
+    """
+    根据文件类型读取文件内容
+    返回: (文件内容, 文件类型)
+    """
+    file_ext = Path(file_path).suffix.lower()
+    
+    if file_ext == '.txt':
+        content = read_txt_file(file_path)
+        return content, 'txt'
+    elif file_ext == '.pdf':
+        content = read_pdf_file(file_path)
+        return content, 'pdf'
+    else:
+        print(f"⚠️  不支持的文件格式: {file_ext}")
+        return "", 'unknown'
+
+def load_documents_from_folder(folder_path: str = "./text") -> Tuple[List[str], List[dict]]:
+    """
+    从指定文件夹加载所有支持的文档
+    返回: (文本列表, 元数据列表)
+    """
+    texts = []
+    metadatas = []
+    
+    # 支持的文件扩展名
+    supported_extensions = {'.txt', '.pdf'}
+    
+    # 确保文件夹存在
+    if not os.path.exists(folder_path):
+        print(f"❌ 文件夹不存在: {folder_path}")
+        return texts, metadatas
+    
+    # 遍历文件夹中的所有文件
+    folder = Path(folder_path)
+    files = list(folder.glob('*'))
+    
+    if not files:
+        print(f"⚠️  文件夹 {folder_path} 中没有文件")
+        return texts, metadatas
+    
+    print(f"📂 正在扫描文件夹: {folder_path}")
+    
+    for file_path in files:
+        if file_path.is_file() and file_path.suffix.lower() in supported_extensions:
+            print(f"  📄 读取文件: {file_path.name}")
+            content, file_type = read_file(str(file_path))
+            
+            if content and content.strip():
+                texts.append(content)
+                metadatas.append({
+                    "source": file_path.name,
+                    "file_type": file_type,
+                    "file_path": str(file_path)
+                })
+                print(f"    ✓ 成功读取 ({len(content)} 字符)")
+            else:
+                print(f"    ✗ 文件内容为空或读取失败")
+    
+    return texts, metadatas
 
 def ingest_text_data(texts, metadatas=None):
     """导入文本数据到知识库"""
@@ -25,97 +120,40 @@ def ingest_text_data(texts, metadatas=None):
 
 def main():
     parser = argparse.ArgumentParser(description="导入医学知识数据")
-    parser.add_argument("--demo", action="store_true", help="导入示例数据")
     parser.add_argument("--text", type=str, help="导入单条文本")
+    parser.add_argument("--folder", type=str, default="./text", help="从指定文件夹导入文档 (默认: ./text)")
     
     args = parser.parse_args()
     
-    if args.demo:
-        # 导入示例医学数据
-        demo_texts = [
-            """
-            高血压定义和分类:
-            高血压是指血压持续升高的慢性疾病。正常血压范围为收缩压<120mmHg且舒张压<80mmHg。
-            高血压分为三级:
-            - 1级高血压(轻度):收缩压140-159mmHg或舒张压90-99mmHg
-            - 2级高血压(中度):收缩压160-179mmHg或舒张压100-109mmHg  
-            - 3级高血压(重度):收缩压≥180mmHg或舒张压≥110mmHg
-            """,
-            """
-            糖尿病症状和诊断:
-            糖尿病是一组以高血糖为特征的代谢性疾病。典型症状包括"三多一少":
-            - 多饮:口渴多喝水
-            - 多食:容易饥饿
-            - 多尿:尿量增加
-            - 消瘦:体重下降
-            诊断标准:空腹血糖≥7.0mmol/L,或餐后2小时血糖≥11.1mmol/L
-            """,
-            """
-            感冒和流感的区别:
-            普通感冒(common cold):
-            - 症状较轻,主要是鼻塞、流涕、咽痛
-            - 很少发热或仅低热
-            - 病程较短,通常1周内恢复
-            
-            流感(influenza):
-            - 症状较重,高热(39-40°C)、全身酸痛、乏力
-            - 起病急,传染性强
-            - 可能引起肺炎等并发症
-            - 需要抗病毒治疗
-            """,
-            """
-            心脏病预警信号:
-            以下症状可能是心脏病的预警信号,需要立即就医:
-            1. 胸痛或胸部不适:压迫感、紧缩感,可能放射到手臂、颈部、下颌
-            2. 呼吸困难:活动或休息时气短
-            3. 心悸:心跳加快或不规律
-            4. 晕厥或头晕
-            5. 异常疲劳
-            6. 恶心、呕吐、冷汗
-            特别注意:女性心脏病症状可能不典型,更常表现为疲劳、气短等。
-            """,
-            """
-            健康饮食金字塔:
-            根据中国居民膳食指南,健康饮食应遵循:
-            
-            第一层(底层,最多):谷薯类
-            - 每天250-400克谷物,包括全谷物和杂豆50-150克
-            - 薯类50-100克
-            
-            第二层:蔬菜水果类
-            - 蔬菜300-500克,深色蔬菜占一半
-            - 水果200-350克
-            
-            第三层:动物性食物
-            - 鱼禽肉蛋总量120-200克
-            - 奶类300克
-            - 大豆及坚果25-35克
-            
-            第四层(顶层,最少):油盐糖
-            - 烹调油25-30克
-            - 食盐<6克
-            - 添加糖<50克
-            """
-        ]
-        
-        metadatas = [
-            {"source": "高血压指南", "category": "心血管疾病"},
-            {"source": "糖尿病诊疗规范", "category": "内分泌疾病"},
-            {"source": "呼吸道感染指南", "category": "呼吸系统"},
-            {"source": "心脏病预防手册", "category": "心血管疾病"},
-            {"source": "营养学基础", "category": "预防保健"}
-        ]
-        
-        print("正在导入示例医学数据...")
-        ingest_text_data(demo_texts, metadatas)
-        
-    elif args.text:
+    if args.text:
+        # 导入单条文本
         print(f"正在导入文本: {args.text[:50]}...")
         ingest_text_data([args.text])
-        
     else:
-        print("请使用 --demo 导入示例数据,或使用 --text 导入自定义文本")
-        print("示例: python ingest_data.py --demo")
+        # 默认从text文件夹导入文档
+        print(f"\n{'='*60}")
+        print("📚 开始从文件夹导入文档...")
+        print(f"{'='*60}\n")
+        
+        texts, metadatas = load_documents_from_folder(args.folder)
+        
+        if texts:
+            print(f"\n📊 统计信息:")
+            print(f"  - 共找到 {len(texts)} 个有效文档")
+            print(f"  - 总字符数: {sum(len(t) for t in texts)}")
+            print(f"\n开始导入到知识库...\n")
+            ingest_text_data(texts, metadatas)
+        else:
+            print(f"\n❌ 没有找到可导入的文档")
+            print("\n💡 提示:")
+            print(f"  - 请确保 {args.folder} 文件夹存在")
+            print("  - 支持的文件格式: .txt, .pdf")
+            print("  - 可使用 --folder 参数指定其他文件夹")
+            print("\n示例:")
+            print("  python ingest_data.py")
+            print("  python ingest_data.py --folder ./my_documents")
+            print("  python ingest_data.py --text '这是一段医学知识...'")
+            print("=" * 60)
 
 if __name__ == "__main__":
     main()
