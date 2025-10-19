@@ -1,8 +1,10 @@
 .env
-__pycache__/*
-agents/__pycache__/*
-agents/rag_agent/__pycache__/*
-agents/web_search_agent/__pycache__/*
+
+# Python 编译文件
+*.pyc
+__pycache__/
+*/__pycache__/
+
 .cursorignore
 开发提示词/*
 官方文档信息.md
