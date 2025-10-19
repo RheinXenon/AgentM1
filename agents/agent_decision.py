@@ -2,7 +2,7 @@
 智能体决策系统 - 根据用户查询路由到合适的Agent
 """
 from typing import Dict, List
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from config import AgentDecisionConfig
 
 class AgentDecision:

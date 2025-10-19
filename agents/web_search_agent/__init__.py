@@ -2,7 +2,7 @@
 网络搜索智能体 - 搜索最新医学研究信息
 """
 from typing import Dict, List
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from duckduckgo_search import DDGS
 from config import WebSearchConfig
 import re

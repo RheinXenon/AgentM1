@@ -3,6 +3,7 @@
 __pycache__/*
 agents/__pycache__/*
 agents/rag_agent/__pycache__/*
+agents/web_search_agent/__pycache__/*
 .cursorignore
 开发提示词/*
 官方文档信息.md

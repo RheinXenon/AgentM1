@@ -2,7 +2,7 @@
 对话智能体 - 处理一般性医疗咨询对话
 """
 from typing import Dict, List
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from config import ConversationConfig
 
 class ConversationAgent:
