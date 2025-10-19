@@ -12,11 +12,11 @@ pip install -r requirements.txt
 ```
 
 ### 配置
-创建`.env`文件，配置Azure OpenAI相关API：
+创建`.env`文件，配置阿里云百炼平台API：
 ```
-AZURE_OPENAI_API_KEY=your_key
-AZURE_OPENAI_ENDPOINT=your_endpoint
-AZURE_OPENAI_DEPLOYMENT_NAME=your_deployment
+DASHSCOPE_API_KEY=your_key
+DASHSCOPE_MODEL_NAME=qwen-plus
+DASHSCOPE_EMBEDDING_MODEL=text-embedding-v2
 ...
 ```
 
@@ -29,7 +29,7 @@ python app.py
 
 ## 技术栈
 - FastAPI后端
-- LangChain + Azure OpenAI
+- LangChain + 阿里云百炼平台（通义千问）
 - Qdrant向量数据库
 - 多Agent架构（RAG/搜索/对话）
 

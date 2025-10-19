@@ -3,7 +3,8 @@
 """
 import os
 from dotenv import load_dotenv
-from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
+from langchain_community.chat_models.tongyi import ChatTongyi
+from langchain_community.embeddings import DashScopeEmbeddings
 
 # 加载环境变量
 load_dotenv()
@@ -11,38 +12,32 @@ load_dotenv()
 class AgentDecisionConfig:
     """Agent决策配置"""
     def __init__(self):
-        self.llm = AzureChatOpenAI(
-            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-            model_name=os.getenv("AZURE_OPENAI_MODEL_NAME"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            temperature=0.1  # 低温度以确保决策准确性
+        self.llm = ChatTongyi(
+            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
+            temperature=0.1,  # 低温度以确保决策准确性
+            top_p=0.8
         )
 
 class ConversationConfig:
     """对话配置"""
     def __init__(self):
-        self.llm = AzureChatOpenAI(
-            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-            model_name=os.getenv("AZURE_OPENAI_MODEL_NAME"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            temperature=0.7  # 适度创造性
+        self.llm = ChatTongyi(
+            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
+            temperature=0.7,  # 适度创造性
+            top_p=0.8
         )
         self.context_limit = 20  # 保留最近20条消息
 
 class WebSearchConfig:
     """网络搜索配置"""
     def __init__(self):
-        self.llm = AzureChatOpenAI(
-            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-            model_name=os.getenv("AZURE_OPENAI_MODEL_NAME"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            temperature=0.3
+        self.llm = ChatTongyi(
+            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
+            temperature=0.3,
+            top_p=0.8
         )
         self.max_results = 5  # 最多搜索结果数
 
@@ -51,33 +46,28 @@ class RAGConfig:
     def __init__(self):
         # 向量数据库配置
         self.vector_db_type = "qdrant"
-        self.embedding_dim = 1536
+        self.embedding_dim = 1536  # DashScope text-embedding-v2 的维度
         self.distance_metric = "Cosine"
-        self.use_local = True  # 使用本地Qdrant
-        self.vector_local_path = "./data/qdrant_db"
-        self.collection_name = "medical_knowledge"
+        self.use_local = os.getenv("QDRANT_USE_LOCAL", "true").lower() == "true"
+        self.vector_local_path = os.getenv("QDRANT_LOCAL_PATH", "./data/qdrant_db")
+        self.collection_name = os.getenv("QDRANT_COLLECTION_NAME", "medical_knowledge")
         
         # 文本分块配置
         self.chunk_size = 512
         self.chunk_overlap = 50
         
-        # Embedding模型
-        self.embedding_model = AzureOpenAIEmbeddings(
-            deployment=os.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME"),
-            model=os.getenv("AZURE_EMBEDDING_MODEL_NAME"),
-            azure_endpoint=os.getenv("AZURE_EMBEDDING_ENDPOINT"),
-            openai_api_key=os.getenv("AZURE_EMBEDDING_API_KEY"),
-            openai_api_version=os.getenv("AZURE_EMBEDDING_API_VERSION")
+        # Embedding模型 - 使用阿里云百炼平台的文本向量模型
+        self.embedding_model = DashScopeEmbeddings(
+            model=os.getenv("DASHSCOPE_EMBEDDING_MODEL", "text-embedding-v2"),
+            dashscope_api_key=os.getenv("DASHSCOPE_API_KEY")
         )
         
         # LLM模型
-        self.llm = AzureChatOpenAI(
-            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-            model_name=os.getenv("AZURE_OPENAI_MODEL_NAME"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            temperature=0.3
+        self.llm = ChatTongyi(
+            model=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-plus"),
+            dashscope_api_key=os.getenv("DASHSCOPE_API_KEY"),
+            temperature=0.3,
+            top_p=0.8
         )
         
         # 检索配置
