@@ -103,7 +103,11 @@ def load_documents_from_folder(folder_path: str = "./text") -> Tuple[List[str], 
 def ingest_text_data(texts, metadatas=None):
     """导入文本数据到知识库"""
     try:
-        rag_agent = MedicalRAG()
+        # 导入配置管理器
+        from config_manager import ConfigManager
+        
+        config_manager = ConfigManager()
+        rag_agent = MedicalRAG(config_manager)
         
         if metadatas is None:
             metadatas = [{"source": f"document_{i}"} for i in range(len(texts))]

@@ -10,38 +10,43 @@ from config import RAGConfig
 import os
 
 class MedicalRAG:
-    """医疗RAG智能体"""
+    """RAG智能体"""
     
-    def __init__(self):
+    def __init__(self, config_manager=None):
         self.config = RAGConfig()
         self.llm = self.config.llm
         self.embedding_model = self.config.embedding_model
+        self.config_manager = config_manager
         
         # 初始化Qdrant客户端
         self._init_vector_db()
         
-        # RAG响应生成提示词
+        # 从配置管理器加载提示词模板
+        self.update_prompt()
+    
+    def update_prompt(self):
+        """更新提示词模板"""
+        template = self.config_manager.get_prompt("rag") if self.config_manager else self._get_default_template()
         self.response_prompt = PromptTemplate(
             input_variables=["query", "context", "conversation_history"],
-            template="""你是一个专业的医疗助手。基于提供的医学知识库内容回答用户问题。
+            template=template
+        )
+    
+    def _get_default_template(self) -> str:
+        """获取默认模板"""
+        return """你是一个专业的智能助手。请根据以下参考资料回答用户的问题。
 
-重要规则:
-1. 只基于提供的上下文信息回答
-2. 如果信息不足,明确说明
-3. 使用专业但易懂的语言
-4. 始终强调需要咨询专业医生
-5. 不要编造信息
+参考资料:
+{context}
 
 对话历史:
 {conversation_history}
 
-医学知识库内容:
-{context}
-
 用户问题: {query}
 
-请提供详细专业的回答:"""
-        )
+请基于提供的参考资料给出准确、专业的回答。如果参考资料中没有相关信息,请诚实地告知用户。
+
+你的回答:"""
     
     def _init_vector_db(self):
         """初始化向量数据库"""

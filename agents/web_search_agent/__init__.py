@@ -10,32 +10,37 @@ import re
 class WebSearchAgent:
     """网络搜索智能体"""
     
-    def __init__(self):
+    def __init__(self, config_manager=None):
         self.config = WebSearchConfig()
         self.llm = self.config.llm
+        self.config_manager = config_manager
         
-        # 搜索响应生成提示词
+        # 从配置管理器加载提示词模板
+        self.update_prompt()
+    
+    def update_prompt(self):
+        """更新提示词模板"""
+        template = self.config_manager.get_prompt("websearch") if self.config_manager else self._get_default_template()
         self.response_prompt = PromptTemplate(
             input_variables=["query", "search_results", "conversation_history"],
-            template="""你是一个医疗信息搜索助手。基于网络搜索结果回答用户的医学问题。
+            template=template
+        )
+    
+    def _get_default_template(self) -> str:
+        """获取默认模板"""
+        return """你是一个智能助手。请根据以下搜索结果回答用户的问题。
 
-重要规则:
-1. 综合搜索结果提供准确信息
-2. 引用来源网站
-3. 区分已验证信息和新研究
-4. 提醒用户验证信息真实性
-5. 始终建议咨询专业医生
+搜索结果:
+{search_results}
 
 对话历史:
 {conversation_history}
 
-网络搜索结果:
-{search_results}
-
 用户问题: {query}
 
-请基于搜索结果提供详细回答:"""
-        )
+请综合搜索结果,给出准确、有用的回答。
+
+你的回答:"""
     
     def search(self, query: str, conversation_history: List[Dict] = None) -> Dict:
         """
@@ -49,13 +54,13 @@ class WebSearchAgent:
             response_dict: 包含回答和搜索结果的字典
         """
         try:
-            # 优化搜索查询 - 添加医学相关关键词
-            medical_query = f"医学 医疗 {query}"
+            # 直接使用用户的查询
+            search_query = query
             
             # 使用DuckDuckGo搜索
             with DDGS() as ddgs:
                 search_results = list(ddgs.text(
-                    medical_query,
+                    search_query,
                     max_results=self.config.max_results
                 ))
             
@@ -100,8 +105,9 @@ class WebSearchAgent:
             
             response = self.llm.invoke(prompt)
             
+            agent_name = self.config_manager.get_config("system_name") if self.config_manager else "网络搜索智能体"
             return {
-                "agent": "网络搜索智能体",
+                "agent": agent_name,
                 "response": response.content,
                 "sources": sources
             }

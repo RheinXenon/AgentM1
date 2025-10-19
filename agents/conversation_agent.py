@@ -1,37 +1,45 @@
 """
-对话智能体 - 处理一般性医疗咨询对话
+对话智能体 - 处理一般性咨询对话
 """
 from typing import Dict, List
 from langchain_core.prompts import PromptTemplate
 from config import ConversationConfig
 
 class ConversationAgent:
-    """医疗对话智能体"""
+    """对话智能体"""
     
-    def __init__(self):
+    def __init__(self, config_manager=None):
         self.config = ConversationConfig()
         self.llm = self.config.llm
+        self.config_manager = config_manager
         
-        # 对话提示词模板
+        # 从配置管理器加载提示词模板
+        self.update_prompt()
+    
+    def update_prompt(self):
+        """更新提示词模板"""
+        template = self.config_manager.get_prompt("conversation") if self.config_manager else self._get_default_template()
         self.conversation_prompt = PromptTemplate(
             input_variables=["query", "conversation_history"],
-            template="""你是一个专业且友好的医疗咨询助手。你的任务是回答用户的健康相关问题。
+            template=template
+        )
+    
+    def _get_default_template(self) -> str:
+        """获取默认模板"""
+        return """你是一个专业且友好的智能助手。你的任务是回答用户的问题。
 
 重要指导原则:
-1. 提供准确、有用的健康建议
+1. 提供准确、有用的建议
 2. 使用通俗易懂的语言
-3. 对于严重症状,明确建议就医
-4. 不做确诊,只提供参考信息
-5. 保持专业但友善的语气
-6. 强调预防和健康生活方式的重要性
+3. 保持专业但友善的语气
+4. 根据上下文提供相关信息
 
 对话历史:
 {conversation_history}
 
 用户: {query}
 
-医疗助手:"""
-        )
+助手:"""
     
     def chat(self, query: str, conversation_history: List[Dict] = None) -> Dict:
         """
@@ -65,15 +73,17 @@ class ConversationAgent:
             
             response = self.llm.invoke(prompt)
             
+            agent_name = self.config_manager.get_config("system_name") if self.config_manager else "对话智能体"
             return {
-                "agent": "医疗对话智能体",
+                "agent": agent_name,
                 "response": response.content
             }
             
         except Exception as e:
             print(f"对话处理出错: {e}")
+            agent_name = self.config_manager.get_config("system_name") if self.config_manager else "对话智能体"
             return {
-                "agent": "医疗对话智能体",
+                "agent": agent_name,
                 "response": "抱歉,处理您的请求时出现错误。请稍后重试。"
             }
     
