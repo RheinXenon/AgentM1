@@ -53,6 +53,20 @@ class RAGConfig:
         self.distance_metric = "Cosine"
         self.use_local = os.getenv("QDRANT_USE_LOCAL", "true").lower() == "true"
         self.vector_local_path = os.getenv("QDRANT_LOCAL_PATH", "./data/qdrant_db")
+        
+        # 多知识库配置 - 每个文件夹对应一个知识库
+        self.knowledge_bases = {
+            "医疗知识库": {
+                "collection_name": "medical_knowledge",
+                "description": "医疗、健康、疾病相关的专业知识"
+            },
+            "商业知识库": {
+                "collection_name": "business_knowledge", 
+                "description": "商业、金融、管理相关的专业知识"
+            }
+        }
+        
+        # 默认知识库（为了兼容旧代码）
         self.collection_name = os.getenv("QDRANT_COLLECTION_NAME", "medical_knowledge")
         
         # 文本分块配置

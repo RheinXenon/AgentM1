@@ -73,12 +73,26 @@ async def chat(request: ChatRequest):
         
         # 根据决策调用相应的Agent
         if agent_type == "RAG":
-            result = rag_agent.query(request.query, conversation_history)
+            # 获取可用的知识库
+            available_kbs = rag_agent.get_all_knowledge_bases()
+            
+            # 决定使用哪个知识库
+            selected_kbs = agent_decision.decide_knowledge_base(request.query, available_kbs)
+            debug_info["selected_knowledge_bases"] = selected_kbs
+            debug_info["llm_calls"].append({
+                "agent": "知识库路由系统",
+                "model": agent_decision.config.model_name,
+                "purpose": "知识库选择决策"
+            })
+            
+            # 查询选定的知识库
+            result = rag_agent.query(request.query, conversation_history, knowledge_bases=selected_kbs)
             debug_info["execution_agent"] = "RAG智能体"
             debug_info["llm_calls"].append({
                 "agent": "RAG智能体",
                 "model": rag_agent.config.model_name if hasattr(rag_agent, 'config') else "未知",
-                "purpose": "知识库检索回答"
+                "purpose": "知识库检索回答",
+                "knowledge_bases": selected_kbs
             })
         elif agent_type == "WEBSEARCH":
             result = web_search_agent.search(request.query, conversation_history)
