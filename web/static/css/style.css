@@ -1,0 +1,374 @@
+/* 全局样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 容器样式 */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* 标签页样式 */
+.tabs {
+    display: flex;
+    background: #f0f0f0;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    background: #f0f0f0;
+    border: none;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.tab:hover {
+    background: #e0e0e0;
+}
+
+.tab.active {
+    background: white;
+    border-bottom: 3px solid #667eea;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 头部样式 */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* 聊天框样式 */
+.chat-box {
+    height: 500px;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+/* 消息样式 */
+.message {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message.user {
+    align-items: flex-end;
+}
+
+.message.assistant {
+    align-items: flex-start;
+}
+
+.message-content {
+    max-width: 70%;
+    padding: 15px;
+    border-radius: 15px;
+    word-wrap: break-word;
+}
+
+.message.user .message-content {
+    background: #667eea;
+    color: white;
+}
+
+.message.assistant .message-content {
+    background: white;
+    color: #333;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.agent-label {
+    font-size: 12px;
+    color: #667eea;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* 来源信息样式 */
+.sources {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    font-size: 12px;
+}
+
+.source-item {
+    margin-top: 5px;
+    padding: 5px;
+    background: #f0f0f0;
+    border-radius: 5px;
+}
+
+/* 输入区域样式 */
+.input-area {
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+#userInput {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+}
+
+#sendBtn {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#sendBtn:hover {
+    transform: scale(1.05);
+}
+
+#sendBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 加载动画样式 */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #667eea;
+}
+
+.loading.active {
+    display: block;
+}
+
+/* 配置区域样式 */
+.config-section {
+    padding: 30px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.config-item {
+    margin-bottom: 25px;
+}
+
+.config-item label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.config-item input[type="text"],
+.config-item textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.config-item input[type="text"]:focus,
+.config-item textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.config-item textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.config-item .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.config-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* 按钮样式 */
+.config-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* 成功消息样式 */
+.success-message {
+    display: none;
+    padding: 15px;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    color: #155724;
+    margin-bottom: 20px;
+}
+
+.success-message.show {
+    display: block;
+}
+
+/* 调试信息样式 */
+.debug-section {
+    padding: 15px;
+    background: #f8f9fa;
+    border-top: 1px solid #ddd;
+}
+
+.debug-toggle {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.3s;
+}
+
+.debug-toggle:hover {
+    background: #5a6268;
+}
+
+.debug-info {
+    display: none;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.debug-info.show {
+    display: block;
+}
+
+.debug-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    border-left: 3px solid #667eea;
+}
+
+.debug-item-header {
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+
+.debug-llm-call {
+    margin: 5px 0;
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+    border-left: 2px solid #764ba2;
+}
+
+.debug-llm-call .model-name {
+    font-weight: bold;
+    color: #764ba2;
+}
+
+.debug-llm-call .agent-name {
+    color: #667eea;
+    font-size: 12px;
+}
+
+.debug-llm-call .purpose {
+    color: #666;
+    font-style: italic;
+    font-size: 12px;
+}
+

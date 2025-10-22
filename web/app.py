@@ -3,6 +3,8 @@ FastAPI应用初始化
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 from .session_manager import SessionManager
 from .routes import chat_router, config_router, health_router
@@ -42,6 +44,11 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    
+    # 挂载静态文件目录
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    if os.path.exists(static_dir):
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
     
     # 初始化组件
     session_manager = SessionManager()
